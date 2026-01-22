@@ -1,0 +1,22 @@
+{
+  "name": "notification-service",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+  "build": "tsc",
+  "start": "node dist/index.js",
+  "deploy:docker": "docker build -t ${ECR_URL}/rvrs-notification-service:${IMAGE_TAG} . && docker push ${ECR_URL}/rvrs-notification-service:${IMAGE_TAG}"
+},
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "dotenv": "^17.2.3",
+    "nodemailer": "^6.9.0"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.1",
+    "@types/node": "^20.19.27",
+    "@types/nodemailer": "^7.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}
