@@ -1,7 +1,11 @@
+data "aws_caller_identity" "current" {}
+
 locals {
-  account_id   = "857521755952"
+  # Extraemos el ID dinámicamente
+  account_id   = data.aws_caller_identity.current.account_id
   region       = "us-east-1"
-  lab_role_arn = "arn:aws:iam::857521755952:role/LabRole"
+  # Construimos el ARN del LabRole dinámicamente
+  lab_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
   supabase_url = var.supabase_db_url
 }
 
@@ -67,7 +71,14 @@ resource "aws_ecs_task_definition" "monorepo_stack" {
         { name = "DATABASE_URL", value = local.supabase_url },
         { name = "KAFKA_BROKER", value = "127.0.0.1:9092" },
         { name = "RABBITMQ_URL", value = "amqp://guest:guest@127.0.0.1:5672" },
-        { name = "NODE_OPTIONS", value = "--dns-result-order=ipv4first --max-old-space-size=1024" }
+        { name = "NODE_OPTIONS", value = "--dns-result-order=ipv4first --max-old-space-size=1024" },
+        
+       
+        { name = "B2_ENDPOINT",    value = var.b2_endpoint },
+        { name = "B2_REGION",      value = var.b2_region },
+        { name = "B2_KEY_ID",      value = var.b2_key_id },
+        { name = "B2_APP_KEY",     value = var.b2_app_key },
+        { name = "B2_BUCKET_NAME", value = var.b2_bucket_name }
       ],
       dependsOn = [
         { containerName = "kafka", condition = "HEALTHY" }, 
@@ -106,10 +117,15 @@ resource "aws_ecs_task_definition" "monorepo_stack" {
       essential = true,
       memory    = 256,
       environment = [
-        { name = "RABBITMQ_URL", value = "amqp://guest:guest@127.0.0.1:5672" }
+        { name = "RABBITMQ_URL", value = "amqp://guest:guest@127.0.0.1:5672" },
+        { name = "SMTP_HOST", value = "smtp.gmail.com" },
+        { name = "SMTP_PORT", value = "465" }, # 465 para SSL, 587 para TLS
+        { name = "SMTP_USER", value = var.smtp_user },
+        { name = "SMTP_PASS", value = var.smtp_pass },
+        { name = "FROM_EMAIL", value = var.smtp_user }
       ],
       dependsOn = [
-        { containerName = "rabbitmq", condition = "START" }
+        { containerName = "rabbitmq", condition = "HEALTHY" }
       ],
       logConfiguration = {
         logDriver = "awslogs",
@@ -200,6 +216,7 @@ resource "aws_ecs_task_definition" "monorepo_stack" {
         { name = "RABBITMQ_DEFAULT_USER", value = "guest" },
         { name = "RABBITMQ_DEFAULT_PASS", value = "guest" },
         { name = "RABBITMQ_NODENAME", value = "rabbit@localhost" }
+        
       ],
       healthCheck = {
         command = ["CMD-SHELL", "rabbitmqctl status || exit 1"],
