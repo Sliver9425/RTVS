@@ -1,0 +1,55 @@
+name: SonarQube Analysis - RVRS Platform
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarqube:
+    name: SonarQube Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Configuración del entorno global para soportar pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      # Instalación compatible con entornos de CI sin verificar estrictamente las versiones del lockfile
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # Escaneo estático multi-lenguaje estándar sobre la rama principal
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >-
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.projectKey=Red-Universitaria-de-Denuncias-Seguras
+            -Dsonar.projectName="Red-Universitaria-de-Denuncias-Seguras"
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/dist/**,**/build/**,**/.venv/**,**/__pycache__/**,**/*.test.ts,**/*.test.tsx,**/*.test.js,**/*.pyc
+
+      # Verificación automatizada del Quality Gate
+      - name: SonarQube Quality Gate Check
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
