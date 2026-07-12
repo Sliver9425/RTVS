@@ -39,7 +39,8 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          GITHUB_REF_NAME: ""  # Permite evadir de forma segura la restricción de ramas de la edición Community
+          GITHUB_REF_NAME: ""  # Permite evadir la restricción de ramas de la edición Community
+          SONAR_SCANNER_OPTS: "-Dsonar.login=${{ secrets.SONAR_TOKEN }}" # Fuerza la autenticación directa por token
         with:
           args: >-
             -Dsonar.projectKey=Red-Universitaria-de-Denuncias-Seguras
