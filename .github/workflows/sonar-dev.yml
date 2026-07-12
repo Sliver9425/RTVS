@@ -33,16 +33,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Escaneo estático multi-lenguaje optimizado para SonarQube Community Build
+      # Escaneo estático multi-lenguaje optimizado con autenticación directa por token
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          GITHUB_REF_NAME: ""  # Permite evadir la restricción de ramas de la edición Community
-          SONAR_SCANNER_OPTS: "-Dsonar.login=${{ secrets.SONAR_TOKEN }}" # Fuerza la autenticación directa por token
         with:
           args: >-
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
             -Dsonar.projectKey=Red-Universitaria-de-Denuncias-Seguras
             -Dsonar.projectName="Red-Universitaria-de-Denuncias-Seguras"
             -Dsonar.sources=.
