@@ -33,7 +33,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Escaneo estático multi-lenguaje optimizado con bypass de ramas para SonarQube Community Build
+      # 🔥 TRUCO MAESTRO: Forzar físicamente a Git a creer que la rama actual es main
+      - name: Force Git Branch to Main
+        run: |
+          git checkout -b main || git branch -m main
+          git symbolic-ref HEAD refs/heads/main
+
+      # Escaneo estático multi-lenguaje optimizado con bypass absoluto de ramas
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
