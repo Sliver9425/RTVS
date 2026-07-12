@@ -22,17 +22,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
+      # Configuración del entorno global para soportar pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      # Instalación limpia respetando el archivo pnpm-lock.yaml
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      # Ejecuta los tests del frontend y microservicios en Node
+      # Ejecución de la suite de pruebas unitarias y generación de reportes de cobertura
       - name: Run Node tests with coverage
-        run: npm run test -- --coverage
+        run: pnpm run test --coverage
         continue-on-error: true  
 
-      # Escaneo multi-lenguaje (Detectará automáticamente JavaScript/TypeScript y Python)
+      # Escaneo estático multi-lenguaje (Analizará TypeScript/JavaScript y Python de forma conjunta)
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
@@ -47,6 +53,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=**/coverage/lcov.info
             -Dsonar.typescript.lcov.reportPaths=**/coverage/lcov.info
 
+      # Verificación automatizada del Quality Gate en el nuevo servidor de la UCE
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
         timeout-minutes: 5
