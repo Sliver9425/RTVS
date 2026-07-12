@@ -39,8 +39,8 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: >-
-            -Dsonar.projectKey=rvrs-platform-uce
-            -Dsonar.projectName="RVRS - Red Universitaria de Denuncias Seguras"
+            -Dsonar.projectKey=Red-Universitaria-de-Denuncias-Seguras
+            -Dsonar.projectName="Red-Universitaria-de-Denuncias-Seguras"
             -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/dist/**,**/build/**,**/.venv/**,**/__pycache__/**,**/*.test.ts,**/*.test.tsx,**/*.test.js,**/*.pyc
 
