@@ -33,21 +33,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Descarga e instalación manual del Sonar Scanner CLI nativo para evadir la acción empaquetada
-      - name: Install Sonar Scanner CLI
-        run: |
-          mkdir -p $HOME/.sonar
-          curl -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
-          unzip -o -q $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-          echo "$HOME/.sonar/sonar-scanner-5.0.1.3006-linux/bin" >> $GITHUB_PATH
-
-      # Ejecución directa por CLI usando autenticación clásica por parámetro -Dsonar.login
-      - name: Execute Sonar Scanner
-        run: |
-          sonar-scanner \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.projectKey=Red-Universitaria-de-Denuncias-Seguras \
-            -Dsonar.projectName="Red-Universitaria-de-Denuncias-Seguras" \
-            -Dsonar.sources=. \
+      # Escaneo estático multi-lenguaje estándar sobre la rama principal usando el Key correcto
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >-
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.projectKey=g10-Red-Universitaria-de-Denuncias-Seguras
+            -Dsonar.projectName="Red-Universitaria-de-Denuncias-Seguras"
+            -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/dist/**,**/build/**,**/.venv/**,**/__pycache__/**,**/*.test.ts,**/*.test.tsx,**/*.test.js,**/*.pyc
+
+      # Verificación automatizada del Quality Gate
+      - name: SonarQube Quality Gate Check
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
