@@ -3,10 +3,10 @@ name: SonarQube Analysis - RVRS Platform
 on:
   push:
     branches:
-      - QA
+      - main
   pull_request:
     branches:
-      - QA
+      - main
 
 jobs:
   sonarqube:
@@ -33,21 +33,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # 🔥 TRUCO MAESTRO: Forzar físicamente a Git a creer que la rama actual es main
-      - name: Force Git Branch to Main
-        run: |
-          git checkout -b main || git branch -m main
-          git symbolic-ref HEAD refs/heads/main
-
-      # Escaneo estático multi-lenguaje optimizado con bypass absoluto de ramas
+      # Escaneo estático multi-lenguaje estándar sobre la rama principal
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          GITHUB_EVENT_NAME: "push"
-          GITHUB_REF: "refs/heads/main"
-          GITHUB_REF_NAME: "main"
         with:
           args: >-
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
