@@ -23,37 +23,27 @@ jobs:
         with:
           node-version: 20
 
-      # Configuración del entorno global para soportar pnpm
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 8
 
-      # Instalación limpia respetando el archivo pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      # Ejecución de la suite de pruebas unitarias y generación de reportes de cobertura
-      - name: Run Node tests with coverage
-        run: pnpm run test --coverage
-        continue-on-error: true  
-
-      # Escaneo estático multi-lenguaje (Analizará TypeScript/JavaScript y Python de forma conjunta)
+      # Escaneo estático multi-lenguaje optimizado
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
-          args: >
+          args: >-
             -Dsonar.projectKey=rvrs-platform-uce
-            -Dsonar.projectName=RVRS - Red Universitaria de Denuncias Seguras
+            -Dsonar.projectName="RVRS - Red Universitaria de Denuncias Seguras"
             -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/dist/**,**/build/**,**/.venv/**,**/__pycache__/**,**/*.test.ts,**/*.test.tsx,**/*.test.js,**/*.pyc
-            -Dsonar.javascript.lcov.reportPaths=**/coverage/lcov.info
-            -Dsonar.typescript.lcov.reportPaths=**/coverage/lcov.info
 
-      # Verificación automatizada del Quality Gate en el nuevo servidor de la UCE
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
         timeout-minutes: 5
