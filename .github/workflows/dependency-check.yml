@@ -1,0 +1,29 @@
+name: Auditoría de Seguridad - Dependency-Check
+
+on:
+  push:
+    branches: [ QA ]
+  pull_request:
+    branches: [ QA ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código fuente
+        uses: actions/checkout@v3
+
+      - name: Ejecutar OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Dependency-Check
+        with:
+          project: 'Proyecto Monorepo QA - Grupo ${{ github.repository }}'
+          path: '.'  # Analizará la raíz (incluyendo el package.json global y los de tus subproyectos de Turborepo)
+          format: 'HTML'
+          out: 'reports'
+
+      - name: Subir Reporte de Vulnerabilidades como Artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-seguridad-owasp
+          path: reports/dependency-check-report.html
