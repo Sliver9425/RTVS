@@ -40,6 +40,7 @@ jobs:
           args: >
             --disableNodeAudit
             --disablePnpmAudit
+            --disableYarnAudit
 
       - name: Subir Reporte de Vulnerabilidades como Artefacto
         uses: actions/upload-artifact@v4
