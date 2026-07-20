@@ -2,27 +2,26 @@ name: Auditoría de Seguridad - Dependency-Check
 
 on:
   push:
-    branches: [ QA ]
+    branches: [ main, master, QA ]
   pull_request:
-    branches: [ QA ]
+    branches: [ main, master, QA ]
 
 jobs:
   security-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del código fuente
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # <--- Actualizado a v4 para evitar demoras de runner
 
       - name: Ejecutar OWASP Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         id: Dependency-Check
-        continue-on-error: true # <--- Evita que el pipeline se caiga si fallan las APIs de Node/PNPM
+        continue-on-error: true
         with:
           project: 'Proyecto Monorepo QA - Grupo ${{ github.repository }}'
           path: '.'
           format: 'HTML'
           out: 'reports'
-          # Desactivamos los analizadores que dan problemas de conexión en monorrepositorios
           args: >
             --disableNodeAudit
             --disablePnpmAudit
@@ -30,5 +29,5 @@ jobs:
       - name: Subir Reporte de Vulnerabilidades como Artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: reporte-seguridad-owasp-dependency-check
+          name: reporte-seguridad-owasp
           path: reports/dependency-check-report.html
